@@ -1,0 +1,14 @@
+# This configuration is intended for development purpose, it's **your** responsibility to harden it for production
+services:
+  elevator-postgresql:
+    image: postgres:14.5
+    volumes:
+      - ../../VOLUME/postgresql-elevator:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=elevator
+      - POSTGRES_PASSWORD=elevatorPassword
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    # If you want to expose these ports outside your dev PC,
+    # remove the "127.0.0.1:" prefix
+    ports:
+      - 127.0.0.1:5435:5432

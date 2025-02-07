@@ -1,0 +1,25 @@
+
+services:
+  pgadmin-elevator:
+    container_name: pgadmin_elevator_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-alex@gmail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - ../../VOLUME/pgadmin-elevator:/var/lib/pgadmin
+
+    ports:
+       - "${PGADMIN_PORT:-5051}:80"
+#    networks:
+#      - postgres
+    restart: unless-stopped
+
+#networks:
+  #postgres:
+#    driver: bridge
+
+volumes:
+   
+    pgadmin:

@@ -1,0 +1,233 @@
+CREATE TABLE IF NOT EXISTS public.contract
+(
+    id_contract int NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_user,
+    id_rol,
+    id_contractType,
+    startDate date NOT NULL,
+    permanency boolean,
+    endDate date,
+    price decimal(10, 2),
+    quantityElevators int,
+    FOREIGN KEY (id_user, id_rol) REFERENCES public.user_rol (id_user, id_rol),
+    FOREIGN KEY (id_contractType) REFERENCES public.contractType (id_contractType)
+);
+
+
+ALTER TABLE public.contract
+ADD CONSTRAINT intervention_pkey PRIMARY KEY (id);
+ADD CONSTRAINT FOREIGN KEY (id_user, id_rol) REFERENCES public.user_rol (id_user, id_rol);
+ADD CONSTRAINT FOREIGN KEY (id_contractType) REFERENCES public.contractType (id_contractType);
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.contract_elevator
+(
+    id_contract int,
+    id_elevator int,
+    PRIMARY KEY (id_contract, id_elevator),
+    FOREIGN KEY (id_contract) REFERENCES public.contract (id_contract),
+    FOREIGN KEY (id_elevator) REFERENCES public.elevator (id_elevator) 
+);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TYPE contract_type AS ENUM ('preventive', 'corrective', 'failure', 'predictive','fully insured');
+
+CREATE TABLE IF NOT EXISTS public.contractType
+(
+    id_contractType int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    type contract_type,
+    price decimal(10, 2)
+    
+);
+
+
+ALTER TABLE public.contractType
+ADD CONSTRAINT contractType_pkey PRIMARY KEY (id);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.elevator
+(
+    id_elevator bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_contract,
+    stopNumbers int,
+    FOREIGN KEY (id_contract) REFERENCES public.contract (id_contract),
+    location character varying(255),
+    maker character varying(255),
+    rae character varying(50) UNIQUE,
+    status character varying(50),
+    type character varying(50)
+);
+
+ALTER TABLE public.elevator
+ADD CONSTRAINT elevator_pkey PRIMARY KEY (id);
+ADD CONSTRAUNT FOREIGN KEY (id_contract) REFERENCES public.contract (id_contract);
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.intervention
+(
+	id_intervention int NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	id_service,
+	FOREIGN KEY (id_service) REFERENCES public.service (id_service),
+	id_tool,
+	FOREIGN KEY (id_tool) REFERENCES public.tool (id_tool),
+	id_sparePart,
+	FOREIGN KEY (id_sparePart) REFERENCES public.sparePart (id_sparePart),
+        description text,
+        isPrivate BOOLEAN
+);
+
+ALTER TABLE public.intervention
+ADD CONSTRAINT intervention_pkey PRIMARY KEY (id);
+ADD CONSTRAINT FOREIGN KEY (id_service) REFERENCES public.service (id_service),
+ADD CONSTRAINT FOREIGN KEY (id_tool) REFERENCES public.tool (id_tool),
+ADD CONSTRAINT FOREIGN KEY (id_sparePart) REFERENCES public.sparePart (id_sparePart),
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TYPE permission_type AS ENUM ('paymentsCollections', 'hireClient', 'hireEmployees', 'orderSparePart''reserveSparePart', 'planJobs', 'manageJobs', 'technicalWork');
+
+
+CREATE TABLE IF NOT EXISTS public.permission
+(
+	id_permission bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	type permission_type
+
+);
+
+ALTER TABLE public.permission
+ADD CONSTRAINT permission_pkey PRIMARY KEY (id);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TYPE role_type AS ENUM ('SuperAdmin', 'Admin', 'Technical', 'Client');
+
+
+CREATE TABLE IF NOT EXISTS public.rol
+(
+    id_rol bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,  
+    type role_type                       
+);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.rol_permission
+(
+    id_rol int,
+    id_permission int,
+    PRIMARY KEY (id_rol, id_permission),
+    FOREIGN KEY (id_rol) REFERENCES public.rol (id_rol),        
+    FOREIGN KEY (id_permission) REFERENCES public.permission (id_permission)  
+);
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE if NOT EXISTS public.service
+(
+	id_service bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	id_elevator int,
+	FOREIGN KEY (id_elevator) REFERENCES public.elevator (id_elevator), 
+	id_contract int,
+	FOREIGN KEY (id_contract) REFERENCES public.contract (id_contract),
+	startDate timestamp,
+	endDate timestamp,
+	cost decimal (10 , 2),
+	price decimal (10 ,2),
+	WorkHour time
+)
+
+
+ALTER TABLE public.service
+ADD CONSTRAINT service_pkey PRIMARY KEY (id);
+ADD CONSTRAINT FOREIGN KEY (id_elevator) REFERENCES public.elevator (id_elevator);
+ADD CONSTRAINT FOREIGN KEY (id_contract) REFERENCES public.contract (id_contract);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.sparePart
+(
+	id_sparePart bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	reference character varying(100),
+	sparePart_name character varying (100),
+	sparePart_type character varying (50),
+	maker character varying (100),
+	price decimal (10 , 2),
+	unitsAvailable int,
+	unitsReserved int,
+	status character varying(50),
+	orderStatus character varying(50)
+);
+
+
+ALTER TABLE public.sparePart
+ADD CONSTRAINT sparePart_pkey PRIMARY KEY (id);
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.tool
+(
+    id_tool int NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    quantity int,
+    status character varying(50),
+    date_of_purchase date,
+    catch_date timestamp,  
+    maker character varying(100),
+    price decimal(10, 2),
+    reference character varying(50)
+);
+
+
+ALTER TABLE public.tool
+ADD CONSTRAINT tool_pkey PRIMARY KEY (id);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.user
+(
+	id_user bigint NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	username character varying(100),
+	password character varying(255),
+	email character varying(100),
+	name character varying(100),
+	address character varying(255),
+	telephone character varying(20),
+	registation DATE;	
+)
+
+
+ALTER TABLE public.user
+ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.user_rol
+(
+    id_user int,
+    id_rol int,
+    PRIMARY KEY (id_user, id_rol),
+    FOREIGN KEY (id_user) REFERENCES public.user (id_user), 
+    FOREIGN KEY (id_rol) REFERENCES public.rol (id_rol)   
+);
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS public.intervention-user_rol
+(
+    id_intervention int,
+    id_user_rol int,
+    PRIMARY KEY (id_intervention, id_rol),
+    FOREIGN KEY (id_intervention) REFERENCES public.intervention (id_intervention), 
+    FOREIGN KEY (id_user_rol) REFERENCES public.user_rol (id_user_rol)   
+);

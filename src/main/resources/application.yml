@@ -1,0 +1,33 @@
+spring:
+  jackson:
+    serialization:
+      indent_output: true
+  application:
+    name: "Elevator"
+    jpa:
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+  datasource:
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5435/elevator}
+    username: ${JDBC_DATABASE_USERNAME:elevator}
+    password: ${JDBC_DATABASE_PASSWORD:elevatorPassword}
+    hikari:
+      connection-timeout: 5435
+      maximum-pool-size: 10
+
+
+server:
+  port: 4560
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+    org.springframework.orm.jpa: DEBUG
